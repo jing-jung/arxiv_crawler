@@ -25,3 +25,7 @@ Thumbs.db
 
 # Data (optional local outputs)
 *.csv
+
+.streamlit/secrets.toml
+__pycache__/
+*.pyc

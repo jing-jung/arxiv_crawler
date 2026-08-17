@@ -7,11 +7,13 @@ import pandas as pd
 from dotenv import load_dotenv
 from groq import Groq
 
-# Llama 3.1 8B($0.05/$0.08) 종료 후, Groq에서 사용 가능한 최저가 텍스트 모델
-DEFAULT_MODEL = "openai/gpt-oss-20b"
+# Groq에서 사용 가능한 최저가/고속 텍스트 모델로 수정
+DEFAULT_MODEL = "llama3-8b-8192" 
 ENV_FILE = ".env.local"
+
+# 다른 스크립트와의 호환성을 위해 summary_one_line으로 통일
 REQUIRED_KEYS = (
-    "summary_one-line",
+    "summary_one_line",
     "summary_easy",
     "real_world",
     "limitations",
@@ -32,12 +34,12 @@ USER_PROMPT_TEMPLATE = """아래 논문 제목과 초록을 읽고, 반드시 �
 [출력 규칙]
 1. JSON 객체 1개만 출력하세요.
 2. 키 이름은 정확히 다음 4개만 사용하세요:
-   - "summary_one-line"
+   - "summary_one_line"
    - "summary_easy"
    - "real_world"
    - "limitations"
 3. 모든 값은 한국어 문자열이어야 합니다.
-4. "summary_one-line": 핵심만 담은 한 줄 요약, 공백 포함 20자 이내
+4. "summary_one_line": 핵심만 담은 한 줄 요약, 공백 포함 20자 이내
 5. "summary_easy": 중학생도 이해할 수 있는 쉬운 설명, 3~4문장
 6. "real_world": 현실 적용 예시, 2~3줄
 7. "limitations": 연구 한계점, 1~2줄
@@ -45,7 +47,7 @@ USER_PROMPT_TEMPLATE = """아래 논문 제목과 초록을 읽고, 반드시 �
 
 [출력 형식 예시]
 {{
-  "summary_one-line": "세션 간 AI 기억 이어주기",
+  "summary_one_line": "세션 간 AI 기억 이어주기",
   "summary_easy": "AI가 대화를 이어갈 때 이전 내용을 어떻게 넘길지 설명합니다. ...",
   "real_world": "긴 문서 작성 AI, 고객 상담 챗봇, 협업 AI 에이전트에 활용될 수 있습니다.",
   "limitations": "이론 중심 연구라 실제 서비스 검증은 아직 부족합니다."
@@ -131,7 +133,9 @@ def summarize_first_paper_from_csv(
     df = pd.read_csv(csv_path, encoding="utf-8-sig")
     first_paper = df.iloc[0]
 
-    print(f"논문 ID: {first_paper['arxiv_id']}")
+    # 컬럼명이 arxiv_id인지 확인 후 접근 (일반적으로 url 또는 id 등일 수 있음)
+    paper_id = first_paper.get('arxiv_id', first_paper.get('url', 'ID 없음'))
+    print(f"논문 ID: {paper_id}")
     print(f"제목: {first_paper['title']}\n")
 
     return summarize_paper(
@@ -142,11 +146,15 @@ def summarize_first_paper_from_csv(
 
 
 if __name__ == "__main__":
-    csv_candidates = ["arxiv_paper.csv", "cs_ai_papers.csv", "paper.csv"]
+    # 프로젝트 내 존재하는 CSV 파일 자동 탐색
+    csv_candidates = ["arxiv_paper.csv", "cs_ai_papers.csv", "papers.csv", "paper.csv"]
     csv_path = next(
         (path for path in csv_candidates if Path(path).exists()),
         "cs_ai_papers.csv",
     )
 
-    summary = summarize_first_paper_from_csv(csv_path)
-    print_summary(summary)
+    try:
+        summary = summarize_first_paper_from_csv(csv_path)
+        print_summary(summary)
+    except Exception as e:
+        print(f"오류 발생: {e}")
