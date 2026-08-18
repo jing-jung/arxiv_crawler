@@ -27,7 +27,9 @@ def process_all_papers(
         df_output = df_input.copy()
         for col in ["summary_one_line", "summary_easy", "real_world", "limitations"]:
             if col not in df_output.columns:
-                df_output[col] = None
+                df_output[col] = pd.Series(dtype='object')
+            else:
+                df_output[col] = df_output[col].astype(object)
 
     total_count = len(df_output)
     

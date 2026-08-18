@@ -153,7 +153,11 @@ elif menu == "⚡ AI 일괄 요약":
         df = load_data()
         for col in ["summary_one_line", "summary_easy", "real_world", "limitations"]:
             if col not in df.columns:
-                df[col] = None
+                # 새 컬럼 생성 시 명시적으로 object(문자열) 타입 지정
+                df[col] = pd.Series(dtype='object')
+            else:
+                # 기존 컬럼이 float64로 잡혀있을 경우를 대비해 타입 강제 변환
+                df[col] = df[col].astype(object)
 
         pending_mask = df["summary_one_line"].isna() | (df["summary_one_line"] == "")
         pending_count = pending_mask.sum()
