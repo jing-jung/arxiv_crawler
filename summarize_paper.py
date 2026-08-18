@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from groq import Groq
 
 # Groq에서 사용 가능한 최저가/고속 텍스트 모델로 수정
-DEFAULT_MODEL = "llama3-8b-8192" 
+DEFAULT_MODEL = "openai/gpt-oss-20b"
 ENV_FILE = ".env.local"
 
 # 다른 스크립트와의 호환성을 위해 summary_one_line으로 통일
